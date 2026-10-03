@@ -72,10 +72,17 @@ interface RunResult {
 }
 
 function run(args: string[], env: Record<string, string> = {}): Promise<RunResult> {
+  // Start from a clean slate: a DEVTO_API_KEY exported in the developer's shell
+  // would otherwise take precedence over the config file these tests write, so
+  // they would pass or fail depending on the machine they run on. The config dir
+  // and base URL are always replaced below, so only the key needs removing.
+  const cleanEnv = { ...process.env };
+  delete cleanEnv["DEVTO_API_KEY"];
+
   return new Promise((resolve) => {
     const child = spawn(process.execPath, [cliPath, ...args], {
       env: {
-        ...process.env,
+        ...cleanEnv,
         DEVTO_CONFIG_DIR: configDir,
         DEVTO_BASE_URL: baseUrl,
         NO_COLOR: "1",

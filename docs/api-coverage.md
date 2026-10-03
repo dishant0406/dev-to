@@ -17,6 +17,12 @@ not mention them.
 | --- | --- | --- | --- |
 | POST | `/api/agent_sessions/presign` | `agentSessions.presign()` | used by `agent-sessions upload` |
 | GET | `/api/agent_sessions/{id}/raw_url` | `agentSessions.rawUrl(id)` | `devto agent-sessions raw-url <id>` |
+| GET | `/api/users/by_username` | `users.get("dishant0406")` | `devto users get <id-or-username>` |
+
+`GET /api/users/by_username?url=<username>` is undocumented, and the spec is wrong
+about the alternative: it says `GET /api/users/{id}` takes an id *or* a username,
+but that path only resolves numeric ids and returns 404 for every username.
+`users.get()` picks the path based on what it was given.
 
 ## Deprecated v0 API
 

@@ -71,9 +71,23 @@ export class UsersResource {
     return this.http.get<MyUser>("/api/users/me");
   }
 
-  /** `GET /api/users/{id}` — public profile. Accepts an id or a username. */
+  /**
+   * A public profile, by id or by username.
+   *
+   * The spec says `GET /api/users/{id}` accepts either, but it only resolves
+   * numeric ids — a username comes back 404. Usernames have to go through
+   * `GET /api/users/by_username?url=`, which the spec does not document.
+   */
   get(idOrUsername: number | string) {
-    return this.http.get<User>(`/api/users/${encodeURIComponent(String(idOrUsername))}`);
+    const value = String(idOrUsername);
+
+    // Only digits are an id. `Number()` would also accept "1e5", "0x10" and
+    // "12.0", which are usernames, and would round ids above 2^53.
+    if (/^\d+$/.test(value)) {
+      return this.http.get<User>(`/api/users/${value}`);
+    }
+
+    return this.http.get<User>("/api/users/by_username", { query: { url: value } });
   }
 
   /** `GET /api/users/search?email=` — requires an admin key. */

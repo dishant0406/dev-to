@@ -22,6 +22,9 @@ const RED = "\u001b[31m";
 const GREEN = "\u001b[32m";
 const YELLOW = "\u001b[33m";
 
+/** The widest a single cell can be before it is cut short. */
+const MAX_CELL_WIDTH = 60;
+
 function useColor(options: OutputOptions): boolean {
   if (options.noColor === true) return false;
   if (process.env["NO_COLOR"] !== undefined) return false;
@@ -89,13 +92,21 @@ function safeCell(value: unknown, options: OutputOptions): string {
  *
  * Only the columns that exist in the data are shown, and columns whose values are
  * all empty or all identical are dropped — API objects carry a lot of noise.
+ *
+ * Cells are truncated to `MAX_CELL_WIDTH` *before* the column width is measured.
+ * Measuring the untruncated value makes the column as wide as the longest value
+ * (some fields, like an article body, are megabytes) and the final join then
+ * exceeds the maximum string length in V8.
  */
 export function renderTable(rows: Record<string, unknown>[], options: OutputOptions = {}): string {
   const columns = chooseColumns(rows);
   if (columns.length === 0) return color("(no fields)", DIM, options);
 
+  const text = (row: Record<string, unknown>, column: string): string =>
+    truncate(safeCell(row[column], options), MAX_CELL_WIDTH);
+
   const widths = columns.map((column) =>
-    Math.max(column.length, ...rows.map((row) => safeCell(row[column], options).length)),
+    Math.max(column.length, ...rows.map((row) => text(row, column).length)),
   );
 
   const lines: string[] = [];
@@ -104,9 +115,7 @@ export function renderTable(rows: Record<string, unknown>[], options: OutputOpti
 
   for (const row of rows) {
     const line = columns
-      .map((column, index) =>
-        truncate(safeCell(row[column], options), 60).padEnd(widths[index] ?? 0),
-      )
+      .map((column, index) => text(row, column).padEnd(widths[index] ?? 0))
       .join("  ");
     lines.push(line.trimEnd());
   }

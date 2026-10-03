@@ -144,6 +144,41 @@ describe("users", () => {
     expect(pathOf(fetchFn.last())).toBe("/api/admin/concepts");
     expect(fetchFn.last().body).toBe('{"concept":{"name":"Rust"}}');
   });
+
+  it("sends a numeric id straight to /api/users/{id}", async () => {
+    const { devto, fetchFn } = setup();
+    await devto.users.get(811279);
+
+    expect(pathOf(fetchFn.last())).toBe("/api/users/811279");
+    expect(queryOf(fetchFn.last())).toEqual({});
+  });
+
+  it("sends a username to by_username, because /api/users/{id} 404s on names", async () => {
+    const { devto, fetchFn } = setup();
+    await devto.users.get("dishant0406");
+
+    expect(pathOf(fetchFn.last())).toBe("/api/users/by_username");
+    expect(queryOf(fetchFn.last())).toEqual({ url: "dishant0406" });
+  });
+
+  it("only treats plain digits as an id", async () => {
+    // Number() would call all of these integers and send them to /api/users/{id},
+    // where they 404 — they are usernames.
+    for (const value of ["1e5", "0x10", "12.0", "+5", "-1", " 12 "]) {
+      const { devto, fetchFn } = setup();
+      await devto.users.get(value);
+
+      expect(pathOf(fetchFn.last())).toBe("/api/users/by_username");
+      expect(queryOf(fetchFn.last())).toEqual({ url: value });
+    }
+  });
+
+  it("does not round an id above 2^53", async () => {
+    const { devto, fetchFn } = setup();
+    await devto.users.get("9007199254740993");
+
+    expect(pathOf(fetchFn.last())).toBe("/api/users/9007199254740993");
+  });
 });
 
 describe("pagination parameter clamping", () => {

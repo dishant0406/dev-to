@@ -67,16 +67,21 @@ export class ConflictError extends DevToError {
 export class ValidationError extends DevToError {
   readonly errors: string[];
 
-  constructor(details: ErrorDetails, errors: string[] = []) {
-    super(
-      errors.length > 0
-        ? `Validation failed (422): ${errors.join("; ")}`
-        : "Validation failed (422).",
-      details,
-    );
+  constructor(details: ErrorDetails, errors: string[] = [], message = "") {
+    super(validationMessage(errors, message), details);
     this.name = "ValidationError";
     this.errors = errors;
   }
+}
+
+/**
+ * The API explains a 422 either in `errors` (one entry per bad field) or in
+ * `error` (a single sentence, e.g. "Title has already been used in the last five
+ * minutes"). Whichever it sent is more useful than a bare status code.
+ */
+function validationMessage(errors: string[], message: string): string {
+  const detail = errors.length > 0 ? errors.join("; ") : message;
+  return detail === "" ? "Validation failed (422)." : `Validation failed (422): ${detail}`;
 }
 
 /** 429 — too many requests. `retryAfterSeconds` comes from the `Retry-After` header. */
@@ -147,7 +152,7 @@ export function createError(
   if (status === 403) return new ForbiddenError(details);
   if (status === 404) return new NotFoundError(details);
   if (status === 409) return new ConflictError(details);
-  if (status === 422) return new ValidationError(details, parsed.errors);
+  if (status === 422) return new ValidationError(details, parsed.errors, parsed.message);
   if (status === 429) return new RateLimitError(details, retryAfterSeconds);
   if (status >= 500) return new ServerError(details);
 

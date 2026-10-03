@@ -64,6 +64,25 @@ describe("renderTable", () => {
     expect(table).toContain("…");
   });
 
+  it("renders a row with a megabyte field without blowing up", () => {
+    // /api/pages returns rows with a ~1MB body_json, and more columns after it.
+    // Measuring the column width from the untruncated value made every cell in
+    // that column a megabyte wide; with enough rows the final join threw
+    // "RangeError: Invalid string length" (the live endpoint returns 709 rows).
+    // 20 rows is enough to prove the width is bounded, without allocating 200MB.
+    const rows = Array.from({ length: 20 }, (_, index) => ({
+      id: index,
+      body_json: `${index}-${"x".repeat(1_000_000)}`,
+      body_markdown: `after-${index}`,
+    }));
+
+    const table = renderTable(rows);
+
+    expect(table).toContain("body_json");
+    expect(table).toContain("body_markdown");
+    expect(table.length).toBeLessThan(1_000_000);
+  });
+
   it("handles an empty list", () => {
     expect(renderTable([])).toContain("no fields");
   });

@@ -35,8 +35,7 @@ export function registerUsersCommands(program: Command): void {
     .argument("<id-or-username>")
     .action(async (idOrUsername: string, _options: unknown, command: Command) => {
       const { client, options } = await openClient(globalOf(command));
-      const numeric = Number(idOrUsername);
-      print(await client.users.get(Number.isInteger(numeric) ? numeric : idOrUsername), options);
+      print(await client.users.get(idOrUsername), options);
     });
 
   users

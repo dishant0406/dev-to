@@ -117,6 +117,18 @@ describe("errors", () => {
     expect(error.message).toContain("title can't be blank");
   });
 
+  it("keeps the API's own message when a 422 has no field errors", async () => {
+    // dev.to answers a duplicate title this way: an `error` string and no `errors`.
+    const body = '{"error":"Title has already been used in the last five minutes","status":422}';
+    const { devto } = client({ status: 422, body });
+
+    const error = (await devto.articles
+      .create({ title: "x" })
+      .catch((caught: unknown) => caught)) as ValidationError;
+    expect(error).toBeInstanceOf(ValidationError);
+    expect(error.message).toContain("Title has already been used in the last five minutes");
+  });
+
   it("maps 500 to ServerError", async () => {
     const { devto } = client({ status: 500, body: "boom" });
     await expect(devto.articles.list()).rejects.toBeInstanceOf(ServerError);
