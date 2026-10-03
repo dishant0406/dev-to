@@ -95,6 +95,18 @@ function run(args: string[], env: Record<string, string> = {}): Promise<RunResul
   });
 }
 
+describe("version", () => {
+  it("reports the version in package.json, not a hardcoded one", async () => {
+    const pkg = JSON.parse(
+      readFileSync(fileURLToPath(new URL("../package.json", import.meta.url)), "utf8"),
+    );
+    const result = await run(["--version"]);
+
+    expect(result.code).toBe(0);
+    expect(result.stdout.trim()).toBe(pkg.version);
+  });
+});
+
 describe("devto api", () => {
   it("sends a raw GET with query parameters", async () => {
     respond = () => ({ status: 200, body: '{"ok":true}' });

@@ -6,6 +6,7 @@
  */
 
 import { Command, CommanderError } from "commander";
+import { version } from "../package.json";
 import { resolveCredentials } from "./config.js";
 import { parseIntArg, UsageError } from "./helpers.js";
 import { printError } from "./output.js";
@@ -21,8 +22,6 @@ import { registerListingCommands } from "./commands/listings.js";
 import { registerPlatformCommands } from "./commands/platform.js";
 import { registerUsersCommands } from "./commands/users.js";
 
-export const VERSION = "1.0.0";
-
 export function buildProgram(): Command {
   const program = new Command();
 
@@ -34,7 +33,7 @@ export function buildProgram(): Command {
   program
     .name("devto")
     .description("Talk to the dev.to / Forem API v1 from the command line")
-    .version(VERSION, "-v, --version")
+    .version(version, "-v, --version")
     .option("--api-key <key>", "API key (overrides DEVTO_API_KEY and the config file)")
     .option("--base-url <url>", "Forem instance URL (defaults to https://dev.to)")
     .option("--json", "print the raw API response instead of a table")
