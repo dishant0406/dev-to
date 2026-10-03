@@ -1,0 +1,36 @@
+{
+  "name": "@dishant0406/dev-to-cli",
+  "version": "1.0.0",
+  "description": "Command line interface for the dev.to / Forem API v1",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "devto": "./dist/cli.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "devto",
+    "dev.to",
+    "forem",
+    "cli"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@dishant0406/dev-to": "1.0.0",
+    "commander": "^14.0.3",
+    "gray-matter": "^4.0.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

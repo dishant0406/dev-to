@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "noEmit": true,
+    "paths": {
+      "@dishant0406/dev-to": ["../sdk/src/index.ts"]
+    }
+  },
+  "include": ["src", "test"]
+}

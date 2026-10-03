@@ -1,0 +1,37 @@
+{
+  "name": "dev-cli",
+  "version": "0.0.0",
+  "private": true,
+  "description": "TypeScript SDK and CLI for the Forem / dev.to API v1",
+  "license": "MIT",
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "npm run build --workspace @dishant0406/dev-to && npm run build --workspace @dishant0406/dev-to-cli",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint . && prettier --check .",
+    "lint:fix": "eslint . --fix && prettier --write .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "spec:check": "node scripts/check-spec-drift.mjs",
+    "clean": "rm -rf packages/*/dist packages/*/*.tsbuildinfo",
+    "verify": "npm run typecheck && npm run lint && npm test && npm run build",
+    "spec:update": "node scripts/check-spec-drift.mjs --update"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^26.6.4",
+    "eslint": "^9.39.5",
+    "js-yaml": "^4.1.0",
+    "prettier": "^3.6.2",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.71.0",
+    "vitest": "^4.1.11"
+  }
+}
