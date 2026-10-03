@@ -33,6 +33,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      # Catch a broken `exports` map, which typechecking cannot see.
-      - name: Import the built SDK from a scratch project
+      # Catch a broken `exports` map or a bin that `npm publish` would drop —
+      # neither of which typechecking can see.
+      - name: Verify packaging and publish metadata
         run: node scripts/check-packaging.mjs
