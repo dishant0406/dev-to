@@ -1,6 +1,6 @@
 {
   "name": "@dishant0406/dev-to",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Typed TypeScript SDK for the Forem / dev.to API v1",
   "license": "MIT",
   "type": "module",
@@ -20,7 +20,9 @@
     "./package.json": "./package.json"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "keywords": [
     "devto",
@@ -32,9 +34,7 @@
   ],
   "scripts": {
     "build": "tsup",
-    "typecheck": "tsc --noEmit",
-    "prepack": "cp ../../README.md ../../LICENSE .",
-    "postpack": "rm -f README.md LICENSE"
+    "typecheck": "tsc --noEmit"
   },
   "publishConfig": {
     "access": "public"

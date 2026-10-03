@@ -20,6 +20,7 @@
     "test:watch": "vitest",
     "spec:check": "node scripts/check-spec-drift.mjs",
     "clean": "rm -rf packages/*/dist packages/*/*.tsbuildinfo",
+    "sync:docs": "cp README.md LICENSE packages/sdk/ && cp README.md LICENSE packages/cli/",
     "verify": "npm run typecheck && npm run lint && npm run build && npm test",
     "spec:update": "node scripts/check-spec-drift.mjs --update"
   },

@@ -7,8 +7,3 @@ coverage/
 .env
 .env.*
 .kajicode/
-
-# Copied in from the repository root by the `prepack` script of each package and
-# removed again by `postpack`. They are only there while a package is being packed.
-packages/*/README.md
-packages/*/LICENSE

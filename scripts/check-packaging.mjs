@@ -12,7 +12,7 @@
  */
 
 import { execFileSync, spawnSync } from "node:child_process";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -33,10 +33,11 @@ function run(command, args, cwd) {
  * starts with "./". A published CLI with no bin installs no command at all, so
  * check the real publish path for every package. `--dry-run` needs no token.
  *
- * npm only picks up a README and LICENSE that sit next to the package.json. The
- * ones at the repository root are ignored, and a symlink pointing at them is
- * dropped from the tarball, so each package copies them in on `prepack`. Without
- * that the npm page reads "ERROR: No README data found!".
+ * npm only reads a README and LICENSE that sit next to the package.json, and it
+ * reads them before any lifecycle script runs. A `prepack` copy is therefore too
+ * late: the tarball gets the file, but the npm page still reads
+ * "ERROR: No README data found!". Each package keeps a real copy instead, and
+ * `npm run sync:docs` refreshes them from the repository root.
  */
 function checkPackage(dir, name) {
   const published = spawnSync("npm", ["publish", "--dry-run"], { cwd: dir, encoding: "utf8" });
@@ -63,6 +64,15 @@ function checkPackage(dir, name) {
   for (const required of ["README.md", "LICENSE"]) {
     if (!files.includes(required)) {
       throw new Error(`${name} would publish without a ${required}, so npm shows no readme`);
+    }
+  }
+
+  // A stale copy would quietly publish an old readme, so compare them.
+  for (const file of ["README.md", "LICENSE"]) {
+    if (!readFileSync(join(dir, file)).equals(readFileSync(join(root, file)))) {
+      throw new Error(
+        `${name}/${file} has drifted from the repository root. Run: npm run sync:docs`,
+      );
     }
   }
 

@@ -101,15 +101,25 @@ by both packages, it lives in the SDK and the CLI imports it.
 
 ### Packaging
 
-Each package is published on its own, so npm only sees the `README.md` and
-`LICENSE` that sit next to that package's `package.json`. The copies at the
-repository root are ignored, and a symlink pointing at them is dropped from the
-tarball — both leave the npm page reading `ERROR: No README data found!`. So each
-package copies them in on `prepack` and deletes them again on `postpack`.
+Each package is published on its own, and npm only reads the `README.md` and
+`LICENSE` that sit next to that package's `package.json`. Two things make this
+easy to get wrong:
 
-`node scripts/check-packaging.mjs` fails if either package would publish without a
-README, or with a `bin` that `npm publish` silently drops. Run it after changing
-any `package.json`.
+- A `prepack` script that copies them in is **too late**. npm reads the readme
+  before any lifecycle script runs, so the tarball gets the file but the npm page
+  still reads `ERROR: No README data found!`.
+- A symlink to the repository-root file is read by npm for the readme, but is
+  dropped from the tarball, so the package ships without it.
+
+So each package keeps a real copy, and `npm run sync:docs` refreshes them:
+
+```sh
+npm run sync:docs   # after editing the root README.md or LICENSE
+```
+
+`node scripts/check-packaging.mjs` fails if a package would publish without a
+README, if the copies have drifted from the root, or if the CLI's `bin` is one
+npm would silently drop. Run it after changing any `package.json`.
 
 ---
 

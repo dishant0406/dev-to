@@ -1,6 +1,6 @@
 {
   "name": "@dishant0406/dev-to-cli",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Command line interface for the dev.to / Forem API v1",
   "license": "MIT",
   "type": "module",
@@ -11,7 +11,9 @@
     "devto": "dist/cli.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "keywords": [
     "devto",
@@ -21,12 +23,10 @@
   ],
   "scripts": {
     "build": "tsup",
-    "typecheck": "tsc --noEmit",
-    "prepack": "cp ../../README.md ../../LICENSE .",
-    "postpack": "rm -f README.md LICENSE"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@dishant0406/dev-to": "1.0.1",
+    "@dishant0406/dev-to": "1.0.2",
     "commander": "^14.0.3",
     "gray-matter": "^4.0.3"
   },
