@@ -9,8 +9,8 @@ A typed TypeScript SDK and a command line tool for the
   `devto api` command that can reach any endpoint.
 
 Every operation in the API spec is implemented. See
-[`docs/api-coverage.md`](docs/api-coverage.md) for the checklist, which is also
-enforced by a test.
+[`docs/api-coverage.md`](https://github.com/dishant0406/dev-to/blob/main/docs/api-coverage.md)
+for the checklist, which is also enforced by a test.
 
 ---
 
@@ -208,7 +208,8 @@ devto api POST /api/follows --data '{"user_ids":[1,2]}'   # asks for confirmatio
 `api` always prints JSON so it pipes cleanly into `jq`. Anything other than `GET`
 asks for confirmation, and `--dry-run` shows the request without sending it.
 
-The full command list is in [`docs/cli-reference.md`](docs/cli-reference.md).
+The full command list is in
+[`docs/cli-reference.md`](https://github.com/dishant0406/dev-to/blob/main/docs/cli-reference.md).
 
 ---
 
@@ -216,7 +217,7 @@ The full command list is in [`docs/cli-reference.md`](docs/cli-reference.md).
 
 ```sh
 npm install
-npm run verify   # typecheck, lint, test, build
+npm run verify   # typecheck, lint, build, test
 ```
 
 | Script                | What it does                                                  |
@@ -228,8 +229,8 @@ npm run verify   # typecheck, lint, test, build
 | `npm run spec:check`  | Fail if the published API spec changed                        |
 | `npm run spec:update` | Refresh the vendored spec                                     |
 
-Read [`AGENTS.md`](AGENTS.md) before changing anything — it explains how this
-codebase is written and why.
+Read [`AGENTS.md`](https://github.com/dishant0406/dev-to/blob/main/AGENTS.md)
+before changing anything — it explains how this codebase is written and why.
 
 ---
 

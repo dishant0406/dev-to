@@ -5,7 +5,8 @@
  * build that is not actually CommonJS, or a `bin` that `npm publish` silently
  * drops. This script can: it packs the SDK, installs the tarball into a scratch
  * project and imports it from both ESM and CJS, then dry-run publishes both
- * packages and fails if npm reports that it would drop any metadata.
+ * packages and fails if npm reports that it would drop any metadata or ship a
+ * tarball with no README.
  *
  *   node scripts/check-packaging.mjs
  */
@@ -31,23 +32,41 @@ function run(command, args, cwd) {
  * `npm pack` keeps the bin, but `npm publish` silently drops a bin whose path
  * starts with "./". A published CLI with no bin installs no command at all, so
  * check the real publish path for every package. `--dry-run` needs no token.
+ *
+ * npm only picks up a README and LICENSE that sit next to the package.json. The
+ * ones at the repository root are ignored, and a symlink pointing at them is
+ * dropped from the tarball, so each package copies them in on `prepack`. Without
+ * that the npm page reads "ERROR: No README data found!".
  */
-function checkPublishMetadata(dir, name) {
-  const result = spawnSync("npm", ["publish", "--dry-run", "--json"], {
-    cwd: dir,
-    encoding: "utf8",
-  });
+function checkPackage(dir, name) {
+  const published = spawnSync("npm", ["publish", "--dry-run"], { cwd: dir, encoding: "utf8" });
+  const output = published.stdout + published.stderr;
 
-  if (result.status !== 0) {
-    throw new Error(`npm publish --dry-run failed for ${name}:\n${result.stderr}`);
-  }
-  if (/was invalid and removed/.test(result.stderr)) {
-    throw new Error(
-      `${name} has invalid publish metadata that npm would silently drop:\n${result.stderr.trim()}`,
-    );
+  // Only the publish path warns about a bin it drops, so this is the one check
+  // `npm pack` cannot make.
+  if (/was invalid and removed/.test(output)) {
+    throw new Error(`${name} has publish metadata npm would silently drop:\n${output.trim()}`);
   }
 
-  console.log(`  ${name} publish metadata ok`);
+  // Re-publishing an existing version is expected once the package is live, and
+  // it still produces the warning above. Anything else failing is a real problem.
+  if (published.status !== 0 && !/previously published versions/.test(output)) {
+    throw new Error(`npm publish --dry-run failed for ${name}:\n${output.trim()}`);
+  }
+
+  const packed = spawnSync("npm", ["pack", "--dry-run", "--json"], { cwd: dir, encoding: "utf8" });
+  if (packed.status !== 0) {
+    throw new Error(`npm pack --dry-run failed for ${name}:\n${packed.stderr}`);
+  }
+
+  const files = JSON.parse(packed.stdout)[0].files.map((file) => file.path);
+  for (const required of ["README.md", "LICENSE"]) {
+    if (!files.includes(required)) {
+      throw new Error(`${name} would publish without a ${required}, so npm shows no readme`);
+    }
+  }
+
+  console.log(`  ${name} publishes ${files.length} files, including README.md and LICENSE`);
 }
 
 try {
@@ -93,9 +112,9 @@ client.tags.list().then((tags) => {
   );
   console.log(run(process.execPath, ["cjs.cjs"], workdir));
 
-  console.log("Checking publish metadata...");
-  checkPublishMetadata(join(root, "packages/sdk"), "@dishant0406/dev-to");
-  checkPublishMetadata(join(root, "packages/cli"), "@dishant0406/dev-to-cli");
+  console.log("Checking publish metadata and tarball contents...");
+  checkPackage(join(root, "packages/sdk"), "@dishant0406/dev-to");
+  checkPackage(join(root, "packages/cli"), "@dishant0406/dev-to-cli");
 
   console.log("Packaging check passed.");
 } finally {

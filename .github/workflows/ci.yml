@@ -20,8 +20,9 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm run lint
-      - run: npm test
+      # The CLI tests spawn the built binary, so the build has to come first.
       - run: npm run build
+      - run: npm test
 
   packaging:
     runs-on: ubuntu-latest

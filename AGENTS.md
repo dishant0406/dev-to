@@ -99,6 +99,18 @@ Nothing else belongs at the top level. Do not add a `packages/core`, a
 `packages/types`, or a `packages/utils`. If a shared helper is genuinely needed
 by both packages, it lives in the SDK and the CLI imports it.
 
+### Packaging
+
+Each package is published on its own, so npm only sees the `README.md` and
+`LICENSE` that sit next to that package's `package.json`. The copies at the
+repository root are ignored, and a symlink pointing at them is dropped from the
+tarball — both leave the npm page reading `ERROR: No README data found!`. So each
+package copies them in on `prepack` and deletes them again on `postpack`.
+
+`node scripts/check-packaging.mjs` fails if either package would publish without a
+README, or with a `bin` that `npm publish` silently drops. Run it after changing
+any `package.json`.
+
 ---
 
 ## 4. How the SDK is written
@@ -243,8 +255,9 @@ They are the reason several design choices look the way they do.
 - Test **behaviour**, not implementation. Assert the URL, method, and body that
   were sent — that is the SDK's real contract.
 - Every bug fix gets a test that fails before the fix.
-- Run everything from the repository root: `npm test`, `npm run typecheck`,
-  `npm run lint`, `npm run build`.
+- Run everything from the repository root: `npm run typecheck`, `npm run lint`,
+  `npm run build`, `npm test`. Build first — the CLI tests spawn the built
+  binary at `packages/cli/dist/cli.js`, so they fail on a clean checkout.
 
 ---
 
@@ -254,8 +267,9 @@ A change is done when **all** of these are true:
 
 - [ ] `npm run typecheck` passes
 - [ ] `npm run lint` passes
-- [ ] `npm test` passes
 - [ ] `npm run build` passes
+- [ ] `npm test` passes
+- [ ] `node scripts/check-packaging.mjs` passes if a `package.json` changed
 - [ ] `docs/api-coverage.md` is accurate if API coverage changed
 - [ ] `docs/cli-reference.md` is accurate if commands changed
 - [ ] No commented-out code, no `TODO`, no debug `console.log`
