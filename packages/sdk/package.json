@@ -1,6 +1,6 @@
 {
   "name": "@dishant0406/dev-to",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Typed TypeScript SDK for the Forem / dev.to API v1",
   "license": "MIT",
   "type": "module",
