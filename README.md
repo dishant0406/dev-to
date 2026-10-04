@@ -213,6 +213,32 @@ The full command list is in
 
 ---
 
+## Use it with a coding agent
+
+The repository ships an [agent skill](https://agentskills.io) at
+`.agents/skills/devto/`. It tells a coding agent which command to reach for, and
+the behaviours that otherwise cause silent mistakes — the invisible rate limits,
+the `422` shape, the fact that `articles push` rewrites the file it reads, and
+that there is no article delete endpoint.
+
+KajiCode and other tools that read `.agents/skills/` pick it up automatically
+when working inside this repository. To use it everywhere:
+
+```sh
+cp -r .agents/skills/devto ~/.agents/skills/
+```
+
+Claude Code reads `.claude/skills/` instead, so copy it there for that tool:
+
+```sh
+mkdir -p ~/.claude/skills && cp -r .agents/skills/devto ~/.claude/skills/
+```
+
+`packages/cli/test/skill.test.ts` checks every command the skill mentions
+against the real command tree, so the skill cannot silently drift out of date.
+
+---
+
 ## Development
 
 ```sh

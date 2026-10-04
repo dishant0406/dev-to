@@ -68,6 +68,8 @@ dev-cli/
 ├── docs/
 │   ├── api-coverage.md    <- the checklist of every API operation
 │   └── cli-reference.md   <- every CLI command, with examples
+├── .agents/
+│   └── skills/devto/      <- the agent skill (see §5a), with references/
 ├── spec/
 │   └── forem-api-v1.yaml  <- vendored copy of the official OpenAPI spec
 ├── scripts/
@@ -216,6 +218,26 @@ devto <resource> <action> [args] [options]
 Always add `--help` text that a human can act on. Always document new commands
 in `docs/cli-reference.md`.
 
+### 5a. The agent skill
+
+`.agents/skills/devto/` is a shipped artifact, not scratch notes. It teaches a
+coding agent to drive this CLI, and it is read by KajiCode and any other tool
+that understands `.agents/skills/`.
+
+Three things keep it honest:
+
+- **The description is the whole trigger.** The loader reads only the first line
+  of a frontmatter value, so a block scalar (`description: >`) parses as the
+  literal string `>`. Keep every value on one line.
+- **`references/commands.md` is a distillation, not a copy.** It maps a goal to a
+  command. If it ever grows into a second copy of `docs/cli-reference.md`,
+  delete it and point at the real one instead.
+- **`packages/cli/test/skill.test.ts` guards it.** It resolves every command the
+  skill mentions against the real command tree, so renaming a command fails the
+  suite instead of silently leaving the skill wrong.
+
+Change a command, and update the skill in the same commit.
+
 ---
 
 ## 6. Things that are true about this API, and will bite you
@@ -282,6 +304,7 @@ A change is done when **all** of these are true:
 - [ ] `node scripts/check-packaging.mjs` passes if a `package.json` changed
 - [ ] `docs/api-coverage.md` is accurate if API coverage changed
 - [ ] `docs/cli-reference.md` is accurate if commands changed
+- [ ] `.agents/skills/devto/` is accurate if commands changed
 - [ ] No commented-out code, no `TODO`, no debug `console.log`
 - [ ] No unused exports, files, types, or dependencies
 - [ ] The change is documented in the README if it is user-visible
